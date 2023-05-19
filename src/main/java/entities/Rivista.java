@@ -27,4 +27,15 @@ public class Rivista extends ElementoCatalogo implements Serializable {
 			TipoEvento periodicità) {
 		this.periodicità = periodicità;
 	}
+
+	public void setMesePubblicazione(String string) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void setEditore(String string) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

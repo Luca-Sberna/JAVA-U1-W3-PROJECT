@@ -2,6 +2,7 @@ package entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,6 +39,16 @@ public class Prestito implements Serializable {
 		this.dataInizio = dataInizio;
 		this.dataPrevista = dataPrevista.plusDays(30);
 		this.dataEffettiva = dataEffettiva;
+	}
+
+	public void setMateriale(Libro libro) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void setDataPrestito(Date date) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
