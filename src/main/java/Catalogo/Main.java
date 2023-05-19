@@ -16,6 +16,9 @@ import entities.Rivista;
 import entities.Utente;
 import lombok.extern.slf4j.Slf4j;
 
+//sono arrivato alla fine con un nervoso assurdo perchè non capivo cosa non funzionasse , anche se ho fatto gli stessi passaggi
+//di ieri...
+
 @Slf4j
 public class Main {
 	public static void main(String[] args) {
