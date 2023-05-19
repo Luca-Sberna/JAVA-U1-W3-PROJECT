@@ -1,6 +1,5 @@
 package entities;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -9,32 +8,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "elementi_catalogo")
 @Inheritance(strategy = InheritanceType.JOINED)
-@SuppressWarnings("serial")
 @NoArgsConstructor
 @Getter
 @Setter
-public abstract class ElementoCatalogo implements Serializable {
+public abstract class ElementoCatalogo {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected UUID codiceIsbn;
 	protected String titolo;
-	protected Integer annoPubblicazione;
-	protected Integer numeroPagine;
-	private Prestito prestito;
+	protected int annoPubblicazione;
+	protected int numeroPagine;
 
-	public void setPrestito(Prestito prestito) {
-		this.prestito = prestito;
-	}
-
-	public Prestito getPrestito() {
-		return prestito;
-	}
 }

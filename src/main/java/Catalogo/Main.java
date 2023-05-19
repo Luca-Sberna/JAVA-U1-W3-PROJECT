@@ -1,85 +1,90 @@
 package Catalogo;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import dao.LibroDAO;
+import dao.ElementoCatalogoDAO;
+import dao.PrenotazioneDAO;
 import dao.PrestitoDAO;
-import dao.RivistaDAO;
 import dao.UtenteDAO;
+import entities.ElementoCatalogo;
 import entities.Libro;
+import entities.Prenotazione;
 import entities.Prestito;
 import entities.Rivista;
 import entities.Utente;
 import lombok.extern.slf4j.Slf4j;
 
-//sono arrivato alla fine con un nervoso assurdo perchè non capivo cosa non funzionasse , anche se ho fatto gli stessi passaggi
-//di ieri...
-
 @Slf4j
 public class Main {
 	public static void main(String[] args) {
-		EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("JavaUnit1Week3Project");
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("JavaUnit1Week3Project");
+		EntityManager entityManager = emf.createEntityManager();
 
-		try {
-			entityManager.getTransaction().begin();
+		ElementoCatalogoDAO elementoDao = new ElementoCatalogoDAO(emf);
+		PrestitoDAO prestitoDao = new PrestitoDAO(emf);
+		PrenotazioneDAO prenotazioneDao = new PrenotazioneDAO(emf);
+		UtenteDAO utenteDao = new UtenteDAO(emf);
 
-			// Creo un utente
-			Utente utente = new Utente();
-			utente.setNome("Mario");
-			utente.setCognome("Rossi");
-			utente.setDataNascita(Date.valueOf("1990-01-01"));
-			UtenteDAO utenteDAO = new UtenteDAO(entityManagerFactory);
-			utenteDAO.save(utente);
+		// Crea un nuovo libro
+		Libro libro1 = new Libro("Il Signore Mi Aiuti", 1954, 1178, "Tolkien", "Fantasy");
+		libro1.setCodiceIsbn(UUID.randomUUID());
+		elementoDao.save(libro1);
 
-			// Creo un libro
-			Libro libro = new Libro();
-			libro.setTitolo("Il signore degli anelli");
-			libro.setAutore("J.R.R. Tolkien");
-			libro.setAnnoPubblicazione(1954);
-			LibroDAO libroDAO = new LibroDAO(entityManagerFactory);
-			libroDAO.save(libro);
+		// Crea una nuova rivista
+		Rivista rivista = new Rivista();
+		rivista.setCodiceIsbn(UUID.randomUUID());
+		rivista.setTitolo("National Geographic");
+		rivista.setAnnoPubblicazione(2022);
+		rivista.setNumeroPagine(100);
+		rivista.setPeriodicità(Rivista.TipoEvento.MENSILE);
+		elementoDao.save(rivista);
 
-			// Creo una rivista
-			Rivista rivista = new Rivista();
-			rivista.setTitolo("National Geographic");
-			rivista.setEditore("National Geographic Society");
-			rivista.setMesePubblicazione("Maggio");
-			RivistaDAO rivistaDAO = new RivistaDAO(entityManagerFactory);
-			rivistaDAO.save(rivista);
+		// Crea un nuovo utente
+		Utente utente = new Utente();
+		utente.setNome("Mario");
+		utente.setCognome("Rossi");
+		utente.setDataNascita(LocalDate.of(1990, 1, 1));
+		utente.setTessera("12345");
+		utenteDao.save(utente);
 
-			// Creo un prestito per il libro
-			Prestito prestitoLibro = new Prestito();
-			prestitoLibro.setUtente(utente);
-			prestitoLibro.setMateriale(libro);
-			prestitoLibro.setDataPrestito(new java.util.Date());
-			PrestitoDAO prestitoDAO = new PrestitoDAO(entityManagerFactory);
-			prestitoDAO.save(prestitoLibro);
+		// Crea un nuovo prestito
+		Prestito prestito = new Prestito();
+		prestito.setUtente(utente);
+		prestito.setElemento(libro1);
+		prestito.setDataInizio(LocalDate.now());
+		prestito.setDataPrevista(LocalDate.now().plusDays(30));
+		prestitoDao.save(prestito);
 
-			// Creo un prestito per la rivista
-			Prestito prestitoRivista = new Prestito();
-			prestitoRivista.setUtente(utente);
-			prestitoRivista.setElemento(rivista);
-			prestitoRivista.setDataPrestito(new java.util.Date());
-			prestitoDAO.save(prestitoRivista);
+		// Crea una nuova prenotazione
+		Prenotazione prenotazione = new Prenotazione();
+		prenotazione.setUtente(utente);
+		prenotazione.setElementoPrenotato(rivista);
+		prenotazione.setDataPrenotazione(LocalDate.now());
+		prenotazioneDao.save(prenotazione);
 
-			entityManager.getTransaction().commit();
+		// Cerca elementi del catalogo per ISBN
+		ElementoCatalogo elementoTrovato = elementoDao.getById(libro1.getCodiceIsbn());
+		log.info("Elemento trovato: " + elementoTrovato.getTitolo());
 
-			log.info("Utente: " + utente);
-			log.info("Libro: " + libro);
-			log.info("Rivista: " + rivista);
-			log.info("Prestito Libro: " + prestitoLibro);
-			log.info("Prestito Rivista: " + prestitoRivista);
-		} catch (Exception e) {
-			entityManager.getTransaction().rollback();
-			log.error("Si è verificato un errore durante il salvataggio dei dati.", e);
-		} finally {
-			entityManager.close();
-			entityManagerFactory.close();
-		}
+		// Cerca elementi del catalogo per anno di pubblicazione
+		List<ElementoCatalogo> elementiAnno = elementoDao.cercaPerAnnoPubblicazione(2022);
+		log.info("Elementi trovati per anno di pubblicazione: " + elementiAnno.size());
+
+		// Cerca libri per autore
+		List<Libro> libriAutore = elementoDao.cercaPerAutore("J.R.R. Tolkien");
+		log.info("Libri trovati per autore: " + libriAutore.size());
+
+		// Cerca elementi del catalogo per titolo
+		List<ElementoCatalogo> elementiTitolo = elementoDao.cercaPerTitolo("National Geographic");
+		log.info(elementiTitolo.toString());
+
+		entityManager.close();
+		emf.close();
 	}
 }

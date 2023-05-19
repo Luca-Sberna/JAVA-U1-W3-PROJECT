@@ -7,61 +7,52 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 
-import entities.Libro;
+import entities.Prenotazione;
 
-public class LibroDAO {
+public class PrenotazioneDAO {
 	private EntityManagerFactory entityManagerFactory;
 
-	public LibroDAO(EntityManagerFactory entityManagerFactory) {
+	public PrenotazioneDAO(EntityManagerFactory entityManagerFactory) {
 		this.entityManagerFactory = entityManagerFactory;
 	}
 
-	public void create(Libro libro) {
+	public void save(Prenotazione prenotazione) {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		entityManager.persist(libro);
+		entityManager.persist(prenotazione);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}
 
-	public void save(Libro libro) {
+	public Prenotazione getById(UUID uuid) {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		entityManager.getTransaction().begin();
-		entityManager.persist(libro);
-		entityManager.getTransaction().commit();
-		entityManager.close();
-	}
-
-	public Libro getById(UUID uuid) {
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		Libro ele = entityManager.find(Libro.class, uuid);
+		Prenotazione ele = entityManager.find(Prenotazione.class, uuid);
 		entityManager.close();
 		return ele;
 	}
 
-	public void delete(UUID uuid) {
+	public void delete(Prenotazione prenotazione) {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		Libro libro = entityManager.find(Libro.class, uuid);
-		if (libro != null) {
-			entityManager.remove(libro);
-		}
+		prenotazione = entityManager.merge(prenotazione);
+		entityManager.remove(prenotazione);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}
 
-	public void refresh(Libro libro) {
+	public void refresh(Prenotazione prenotazione) {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		libro = entityManager.merge(libro);
-		entityManager.refresh(libro);
+		prenotazione = entityManager.merge(prenotazione);
+		entityManager.refresh(prenotazione);
 		entityManager.close();
 	}
 
-	public List<Libro> findAll() {
+	public List<Prenotazione> findAll() {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		TypedQuery<Libro> query = entityManager.createQuery("SELECT l FROM Libro l", Libro.class);
-		List<Libro> libri = query.getResultList();
+		TypedQuery<Prenotazione> query = entityManager.createQuery("SELECT pr FROM Prenotazione pr",
+				Prenotazione.class);
+		List<Prenotazione> elementi = query.getResultList();
 		entityManager.close();
-		return libri;
+		return elementi;
 	}
 }

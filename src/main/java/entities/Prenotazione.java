@@ -16,14 +16,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "prestiti")
+@Table(name = "prenotazioni")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Prestito {
+public class Prenotazione {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private UUID idPrestito;
+	private UUID idPrenotazione;
 
 	@ManyToOne
 	@JoinColumn(name = "utente_id")
@@ -31,18 +31,8 @@ public class Prestito {
 
 	@ManyToOne
 	@JoinColumn(name = "elemento_catalogo_id")
-	private ElementoCatalogo elemento;
-	private LocalDate dataInizio;
-	private LocalDate dataPrevista;
-	private LocalDate dataEffettiva;
+	private ElementoCatalogo elementoPrenotato;
 
-	public Prestito(Utente utente, ElementoCatalogo elemento, LocalDate dataInizio, LocalDate dataPrevista,
-			LocalDate dataEffettiva) {
-		this.utente = utente;
-		this.elemento = elemento;
-		this.dataInizio = dataInizio;
-		this.dataPrevista = dataPrevista.plusDays(30);
-		this.dataEffettiva = dataEffettiva;
-	}
+	private LocalDate dataPrenotazione;
 
 }
