@@ -23,6 +23,7 @@ import lombok.Setter;
 public abstract class ElementoCatalogo implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
 	protected UUID codiceIsbn;
 	protected String titolo;
 	protected Integer annoPubblicazione;
