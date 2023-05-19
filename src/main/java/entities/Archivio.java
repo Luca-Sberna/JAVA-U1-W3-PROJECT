@@ -1,17 +1,35 @@
-package Catalogo;
+package entities;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.CascadeType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 public class Archivio {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private UUID id;
+
+	@OneToMany(cascade = CascadeType.ALL)
 	private List<ElementoCatalogo> elementiCatalogo;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<Prestito> prestiti;
 
 	public Archivio() {
 		this.elementiCatalogo = new ArrayList<>();
+		this.prestiti = new ArrayList<>();
 	}
 
 	public void aggiungiElemento(ElementoCatalogo elemento) {
@@ -20,12 +38,15 @@ public class Archivio {
 
 	public ElementoCatalogo rimuoviElemento(String codiceIsbn) {
 		ElementoCatalogo elementoRimosso = ricercaPerIsbn(codiceIsbn);
-		elementiCatalogo.removeIf(e -> e.codiceIsbn.equals(codiceIsbn));
+		if (elementoRimosso != null) {
+			elementiCatalogo.remove(elementoRimosso);
+		}
 		return elementoRimosso;
 	}
 
 	public ElementoCatalogo ricercaPerIsbn(String codiceIsbn) {
-		return elementiCatalogo.stream().filter(e -> e.codiceIsbn.equals(codiceIsbn)).findFirst().orElse(null);
+		return elementiCatalogo.stream().filter(e -> codiceIsbn != null && codiceIsbn.equals(e.getCodiceIsbn()))
+				.findFirst().orElse(null);
 	}
 
 	public List<ElementoCatalogo> getElementiCatalogo() {
@@ -33,12 +54,13 @@ public class Archivio {
 	}
 
 	public List<ElementoCatalogo> ricercaPerAnnoPubblicazione(int annoPubblicazione) {
-		return elementiCatalogo.stream().filter(e -> e.annoPubblicazione == annoPubblicazione).toList();
+		return elementiCatalogo.stream().filter(e -> e.getAnnoPubblicazione() == annoPubblicazione)
+				.collect(Collectors.toList());
 	}
 
 	public List<Libro> ricercaPerAutore(String autore) {
 		return elementiCatalogo.stream().filter(e -> e instanceof Libro).map(e -> (Libro) e)
-				.filter(l -> autore.equals(l.getAutore())).toList();
+				.filter(l -> autore.equals(l.getAutore())).collect(Collectors.toList());
 	}
 
 //	NEL CORSO DELLO SVILUPPO DEL PROGETTO, HO CERCATO SOLUZIONI ONLINE PER
@@ -72,4 +94,25 @@ public class Archivio {
 			e.printStackTrace();
 		}
 	}
+
+	public void aggiungiPrestito(Utente utente, ElementoCatalogo elemento, LocalDate dataInizio, LocalDate dataPrevista,
+			LocalDate dataEffettiva) {
+		Prestito prestito = new Prestito(utente, elemento, dataInizio, dataPrevista, dataEffettiva);
+		prestiti.add(prestito);
+
+		// Aggiungi l'elemento al prestito
+		elemento.setPrestito(prestito);
+	}
+
+	public List<Prestito> ricercaPrestitiPerUtente(String numeroTessera) {
+		return prestiti.stream().filter(p -> p.getUtente().getTessera().equals(numeroTessera))
+				.collect(Collectors.toList());
+	}
+
+	public List<Prestito> ricercaPrestitiScadutiNonRestituiti() {
+		LocalDate now = LocalDate.now();
+		return prestiti.stream().filter(p -> p.getDataEffettiva() == null)
+				.filter(p -> p.getDataPrevista().isBefore(now)).collect(Collectors.toList());
+	}
+
 }
