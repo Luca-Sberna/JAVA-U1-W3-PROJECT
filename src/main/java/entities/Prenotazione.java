@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -21,9 +19,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Prenotazione {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private UUID idPrenotazione;
+//	@SequenceGenerator(name = "prenotazione_seq", sequenceName = "prenotazione_seq", allocationSize = 1)
+//	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prenotazione_seq")
+	private UUID id;
 
 	@ManyToOne
 	@JoinColumn(name = "utente_id")
@@ -35,4 +35,10 @@ public class Prenotazione {
 
 	private LocalDate dataPrenotazione;
 
+	public Prenotazione(UUID id, Utente utente, ElementoCatalogo elementoPrenotato, LocalDate dataPrenotazione) {
+		this.id = id;
+		this.utente = utente;
+		this.elementoPrenotato = elementoPrenotato;
+		this.dataPrenotazione = dataPrenotazione;
+	}
 }
